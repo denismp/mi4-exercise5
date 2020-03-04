@@ -13,7 +13,42 @@ contract FundingTest {
     }
 
     function beforeEach() public {
-        funding = new Funding(1 days); 
+        funding = new Funding(1 days, 100 finney); 
+    }
+
+    function testWithdrawalByOwner() public {
+        uint initBalance = address(this).balance;
+        funding.donate.value(50 finney);
+
+        bytes memory bs = abi.encodePacked(keccak256("withdraw()"));
+        (bool result,) = address(funding).call(bs);
+        Assert.equal(result, false,"Allows for withdrawal before reaching the goal");
+
+        funding.donate.value(50 finney)();
+        Assert.equal(address(this).balance, initBalance - 100 finney, "Balance before withdrawal doesn't correspond to sum of donations");
+
+        bs = abi.encodePacked(keccak256("withdraw()"));
+        (result,) = address(funding).call(bs);
+        Assert.equal(result, true, "Doesn't allow for withdrawal after reaching the goal");
+        Assert.equal(address(this).balance, initBalance,"Balance after withdrawal doesn't correspond to sum of donations");
+    }
+
+    function testWithdrawalByNotOwner() public {
+        // Make sure to check what goal is set in migration (100 Finney) 
+        funding = Funding(DeployedAddresses.Funding());
+        funding.donate.value(100 finney);
+
+        bytes memory bs = abi.encodePacked(keccak256("withdraw()"));
+        (bool result,) = address(funding).call(bs);
+        Assert.equal(result, false, "Allows for withdrawal by not an owner");
+    }
+
+    function testDonatingAfterTimeIsUp() public {
+        Funding newFund = new Funding(0, 100 finney);
+        bytes memory bs = abi.encodePacked(keccak256("donate"));
+        
+        (bool result,) = address(newFund).call.value(10 finney)(bs);
+        Assert.equal(result, false, "Allows for donations when time is up");
     }
 
     function testTrackingDonatorsBalance() public {
