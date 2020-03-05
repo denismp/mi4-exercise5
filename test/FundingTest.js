@@ -17,6 +17,42 @@ contract("Funding", async accounts => {
         funding = await Funding.new(DAY,goal);
     });
 
+    it("javascript test allows to withdraw funds after time is up and goal is not reached", async () => {
+        await funding.donate({from: secondAccount, value: 50*FINNEY});
+
+        const initBalance = await web3.eth.getBalance(secondAccount);
+        assert.equal(await funding.balances.call(secondAccount), 50*FINNEY);
+
+        await utils.timeTravel(web3, DAY);
+        await funding.refund({from: secondAccount});
+        const finalBalance = await web3.eth.getBalance(secondAccount);
+        assert.isTrue(parseInt(finalBalance, 10) > parseInt(initBalance, 10));
+    });
+
+    it("javascript test does not allow to withdraw funds after time is up and goal is reached", async () => {
+        await funding.donate({from: secondAccount, value: 100*FINNEY});
+        assert.equal(await funding.balances.call(secondAccount, 50*FINNEY));
+        
+        await utils.timeTravel(web3, DAY);
+        try{
+            await funding.refund({from: secondAccount});
+            assert.fail();
+        } catch (err) {
+            assert.ok(/revert/.test(err.message));
+        }
+    });
+
+    it("java script test does not allow to withdraw funds before time is up and goal is not reached", async () => {
+        await funding.donate({from: secondAccount, value: 50*FINNEY});
+        assert.equal(await funding.balances.call(secondAccount), 50*FINNEY);
+        try {
+            await funding.refund({from: secondAccount});
+            assert.fail();
+        } catch (err) {
+            assert.ok(/revert/.test(err.message));
+        }
+    });
+
     it("javascript test allows owner to withdraw funds when goal is reached", async () => {
         await funding.donate({from: secondAccount, value: 30*FINNEY});
         await funding.donate({from: thirdAccount, value: 70*FINNEY});

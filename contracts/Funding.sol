@@ -22,13 +22,31 @@ contract Funding {
     }
 
     modifier onlyNotFinished() {
-        require(!isFinished(), "is not finished.  time has not expired.");
+        require(!isFinished(), "is finished.  time has expired.");
         _;
     }
 
     modifier onlyFunded() {
         require(isFunded(), "Not funded");
         _;
+    }
+
+    modifier onlyNotFunded() {
+        require(!isFunded(), "must be not funded");
+        _;
+    }
+
+    modifier onlyFinished() {
+        require(isFinished(), "is not finished/timed out");
+        _;
+    }
+
+    function refund() public onlyFinished() onlyNotFunded() {
+        uint amount = balances[msg.sender];
+        require(amount > 0, "Not enough balance to tranfer");
+
+        balances[msg.sender] = 0;
+        msg.sender.transfer(amount);
     }
 
     function isFunded() view public returns (bool) {
