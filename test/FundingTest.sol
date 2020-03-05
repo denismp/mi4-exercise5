@@ -18,7 +18,7 @@ contract FundingTest {
 
     function testWithdrawalByOwner() public {
         uint initBalance = address(this).balance;
-        funding.donate.value(50 finney);
+        funding.donate.value(50 finney)();
 
         bytes memory bs = abi.encodePacked(keccak256("withdraw()"));
         (bool result,) = address(funding).call(bs);

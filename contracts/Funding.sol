@@ -13,13 +13,16 @@ contract Funding {
         goal = _goal;
     }
 
+    event withdrawEvent(address _who, uint _amount);
+    event donateEvent(address _who, uint _amount);
+
     modifier onlyOwner() {
         require(owner == msg.sender, "You must be the owner");
         _;
     }
 
     modifier onlyNotFinished() {
-        require(!isFinished());
+        require(!isFinished(), "is not finished.  time has not expired.");
         _;
     }
 
@@ -32,8 +35,9 @@ contract Funding {
         return raised >= goal; 
     }
 
-    function withdraw() public onlyOwner onlyFunded {
-         owner.transfer(address(this).balance);   
+    function withdraw() public onlyOwner() onlyFunded() {
+        emit withdrawEvent(msg.sender,address(this).balance);
+        owner.transfer(address(this).balance);   
          //msg.sender.transfer(msg.sender.balance); 
     }
 
@@ -42,6 +46,7 @@ contract Funding {
     }
 
     function donate() public onlyNotFinished payable {
+        emit donateEvent(msg.sender,msg.value);
         balances[msg.sender] += msg.value;
         raised += msg.value; 
     } 
