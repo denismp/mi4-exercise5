@@ -31,7 +31,7 @@ contract("Funding", async accounts => {
 
     it("javascript test does not allow to withdraw funds after time is up and goal is reached", async () => {
         await funding.donate({from: secondAccount, value: 100*FINNEY});
-        assert.equal(await funding.balances.call(secondAccount, 50*FINNEY));
+        assert.equal(await funding.balances.call(secondAccount), 100*FINNEY);
         
         await utils.timeTravel(web3, DAY);
         try{
