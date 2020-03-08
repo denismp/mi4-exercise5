@@ -12,7 +12,7 @@ timeTravel = (web3, seconds) => {
 
             web3.currentProvider.send({
                 jsonrpc: "2.0",
-                mehtod: "evm_mine",
+                method: "evm_mine",
                 id: new Date().getTime()
             }, (err, res) => {
                 return err ? reject(err) : resolve(res);
