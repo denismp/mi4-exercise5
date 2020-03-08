@@ -98,6 +98,12 @@ npm install --save-dev solidity-coverage@0.6.2
 4.	Now to run your tests you should use the following command:
 npm run test:coverage
 Here is the final result:
+
+NOTE:  The above test did not work.  I recommend https://github.com/sc-forks/solidity-coverage
+Here is basicall what I did.
+1. init -y
+2. npm install --save-dev solidity-coverage  //produces errors and warning.
+3. truffle run coverage file "test/FundingTest.js"
  
 Congratulations, you have all features implemented and decent test coverage.
  
